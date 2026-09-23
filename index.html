@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLM Exam</title>
+<style>
+:root{--ink:#2b2340;--bg:#f4f0ff;--card:#fff;--rose:#e0457b;--mint:#16906d;--mut:#6b6485;--line:#ddd5f3;--gt:#e3f6ee;--bt:#fde6ee}
+@media(prefers-color-scheme:dark){:root{--ink:#efeaff;--bg:#1c1730;--card:#282142;--mut:#a89fc7;--line:#3d3560;--gt:#17392f;--bt:#43202f}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;gap:8px;font-size:14px;flex-wrap:wrap}
+#bar{position:sticky;top:41px;z-index:5;display:block;height:4px;width:0;background:var(--rose);transition:width .3s}
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:Georgia,serif;line-height:1.2}
+h1{font-size:clamp(34px,8vw,52px);margin:18px 0 6px}
+h2{font-size:26px;margin:38px 0 4px}h3{font-size:18px;margin:22px 0 8px;color:var(--mut)}
+.hint{color:var(--mut);margin:0 0 14px}
+.q{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+.q p{margin:0 0 10px}.q.ok{border-color:var(--mint)}.q.no{border-color:var(--rose)}
+.o{display:grid;gap:8px}
+button,input,select{font:inherit;color:inherit}
+.o button{text-align:left;background:transparent;border:2px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer}
+.o button:hover:not(:disabled){border-color:var(--rose)}
+.o button.g{background:var(--gt);border-color:var(--mint)}.o button.b{background:var(--bt);border-color:var(--rose)}
+.r{display:flex;gap:8px}
+input,select{background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+input{flex:1}select{width:100%}
+.r button,.btns button{background:var(--rose);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-weight:600;cursor:pointer}
+button:disabled,input:disabled,select:disabled{opacity:.75;cursor:default}
+:focus-visible{outline:3px solid var(--rose);outline-offset:2px}
+.fb{margin-top:8px;font-weight:600}.fb:empty{display:none}
+.q.ok .fb{color:var(--mint)}.q.no .fb{color:var(--rose)}
+#res{background:var(--card);border:2px solid var(--rose);border-radius:14px;padding:8px 20px 22px;margin-top:30px;text-align:center}
+.btns{margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+@media(prefers-reduced-motion:no-preference){.fb{animation:pop .3s}@keyframes pop{from{opacity:0;transform:translateY(4px)}}}
+
+.btns{margin-top:20px;padding-top:16px;border-top:2px dashed var(--line)}
+.btns button{font-size:16px;padding:12px 20px;min-width:170px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+#sf{background:#7a5af8}#gn{background:var(--mint)}
+.btns button:active{transform:translateY(2px);box-shadow:none}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:20;max-width:92vw;width:max-content;padding:14px 22px;border-radius:16px;font-weight:700;font-size:17px;text-align:center;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:all .3s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.ok{background:var(--mint)}#toast.no{background:#7a5af8}
+.cf{position:fixed;top:-20px;z-index:30;pointer-events:none;font-size:22px;animation:fall 1.8s linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(360deg);opacity:.2}}
+</style></head><body>
+<div id="toast" role="status" aria-live="polite"></div>
+<header><b>CLM Exam</b><span id="st"></span></header><i id="bar"></i>
+<main>
+<h1>CLM Exam</h1>
+<p class="hint">Hi, baby Wiku 💗 College Logic and Math: 50 items (20 multiple choice, 15 enumeration, 15 matching). Every answer is checked right away. You can do this!</p>
+<div id="app"></div><div id="res"><div id="sum"><h2>Finish all 50 items to see your score</h2><p>You can do this, Wiku! 💗</p></div><div class="btns"><button id="rt">Retake exam</button><button id="sf">Shuffle exam</button><button id="gn">Generate new exam</button></div></div>
+</main>
+<script>
+const $=s=>document.querySelector(s),R=n=>Math.floor(Math.random()*n),P=a=>a[R(a.length)],
+sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=R(i+1);[a[i],a[j]]=[a[j],a[i]]}return a},
+gc=(a,b)=>b?gc(b,a%b):a,fr=(n,d)=>{const k=gc(Math.abs(n),d);n/=k;d/=k;return d==1?''+n:n+'/'+d},
+M=n=>'PhP '+Math.round(n).toLocaleString('en-US'),S=n=>String(+n.toFixed(4)),U=a=>[...new Set(a.map(String))];
+const eqx=()=>{let a,b,c,d,L,n;do{b=P([3,4,5,6,8,10]);d=P([3,4,5,6,8,10]);a=1+R(b-1);c=1+R(d-1);L=b*d;n=L-a*d-c*b}while(n<=0);return[a,b,c,d,L,n]};
+// Generators: [question, correct answer, wrong answers]
+const G=[
+()=>{let b=2+R(8),e=2+R(8),a=1+R(b-1),c=1+R(e-1);while(b==e){e=2+R(8);c=1+R(e-1)}const n=a*e+c*b,d=b*e;return[`Add ${a}/${b} + ${c}/${e}. Give the answer in simplest form.`,fr(n,d),[fr(a+c,b+e),fr(n+1,d),fr(n,d+1),fr(n-1,d),fr(n+2,d)]]},
+()=>{const[a,b,c,d,L,n]=eqx();return[`Partner A holds ${a}/${b} of the equity and Partner B holds ${c}/${d}. What fraction does Partner C hold?`,fr(n,L),[fr(L-n,L),fr(n+1,L),fr(n,L+1),fr(n+2,L),fr(Math.abs(n-1)||3,L)]]},
+()=>{const[a,b,c,d,L,n]=eqx(),p=360000*(1+R(3)),k=p/L*n;return[`Partners A (${a}/${b}) and B (${c}/${d}) share a business with Partner C, who holds the remaining share. Net profit is ${M(p)}. What is Partner C's cash share?`,M(k),[M(p-k),M(k+p/L),M(Math.abs(k-p/L)||k*2),M(k*2)]]},
+()=>{const[n,d]=P([[1,2],[3,5],[9,10],[3,8],[7,40],[9,20],[5,8],[1,8],[3,20],[7,8],[11,20],[13,25]]),v=n/d*100;return[`Express ${n}/${d} as a percent.`,S(v)+'%',[S(v/100)+'%',S(v/10)+'%',S(v*10)+'%',S(d/n*100)+'%']]},
+()=>{const L=[[45,'9/20'],[35,'7/20'],[15,'3/20'],[65,'13/20'],[85,'17/20'],[12.5,'1/8'],[17.5,'7/40'],[62.5,'5/8'],[6.25,'1/16']],[p,f]=P(L);return[`Write ${p}% as a fraction in simplest form.`,f,L.filter(x=>x[0]!=p).map(x=>x[1])]},
+()=>{const p=P([75,60,125,8,2.5,0.05,45,0.5,32]),v=p/100;return[`Convert ${p}% to a decimal.`,S(v),[S(v*10),S(v/10),S(p),S(v+1)]]},
+()=>{const r=P([120,150,180,200,250]),h=P([43,44,45,46,48]),o=h-40,v=o*r*1.5;return[`Jose earns ${M(r)} per hour for a 40-hour week. Hours beyond 40 are paid at 1.5 times the hourly rate. He worked ${h} hours. What is his overtime pay?`,M(v),[M(o*r),M(h*r*1.5),M(o*r*2),M(v+r)]]},
+()=>{const r=P([120,150,180,200,250]),h=P([43,44,45,46,48]),o=h-40,v=40*r+o*r*1.5;return[`Ana earns ${M(r)} per hour for a 40-hour week, and overtime is paid at 1.5 times the hourly rate. She worked ${h} hours. What is her gross pay?`,M(v),[M(h*r),M(40*r),M(40*r+o*r),M(o*r*1.5)]]},
+()=>{const b=P([12000,15000,18000,20000]),r=P([2,3,4,5]),q=P([80000,100000,120000]),s=q+P([60000,80000,120000,180000]),c=(s-q)*r/100;return[`A sales agent earns a base salary of ${M(b)} plus ${r}% commission on sales above a quota of ${M(q)}. Her total sales are ${M(s)}. What are her total earnings?`,M(b+c),[M(b+s*r/100),M(c),M(b+q*r/100),M(s*r/100)]]},
+()=>{const a=2+R(13),b=2+R(13),[t,v]=P([[`${a} + (−${b})`,a-b],[`${a} − (−${b})`,a+b],[`−${a} − ${b}`,-a-b],[`−${a} × (−${b})`,a*b],[`${a} × (−${b})`,-a*b],[`−${a*b} ÷ ${b}`,-a],[`−${a} + ${b}`,b-a]]);return[`Evaluate: ${t}`,''+v,[-v,v+2,v-2,v+b,a-b+1].map(String)]},
+()=>{const a=1+R(9),b=5+R(9),c=1+R(4),d=2+R(3),v=a+(b-c)*d*d;return[`Evaluate: ${a} + (${b} − ${c}) × ${d}²`,''+v,[a+(b-c)*d,(a+b-c)*d*d,a+((b-c)*d)**2,a+(b-c)*2*d].map(String)]},
+()=>{const n=2+R(4),e=2+R(3),s=['','','²','³','⁴'][e];return R(2)?[`Evaluate: (−${n})${s}`,''+(-n)**e,[-((-n)**e),n*e,-n*e,n**e+1].map(String)]:[`Evaluate: −${n}${s}`,''+-(n**e),[n**e,-n*e,n*e,1-(n**e)].map(String)]},
+()=>{const a=(11+R(90))/10,b=(11+R(40))/10,v=a*b;return[`Multiply: ${a.toFixed(1)} × ${b.toFixed(1)}`,S(v),[S(v/10),S(v*10),S(v+.1),S(v-.01)]]},
+()=>{const T=P([400,500,600,800]),x=T*P([.1,.2,.25,.3]),rt=P([80000,100000,120000]),k=rt*x/T;return[`A firm rents ${T} sq. m. of space for ${M(rt)} a month. The Sales Department uses ${x} sq. m. How much rent is allocated to Sales?`,M(k),[M(rt-k),M(k/2),M(k+5000),M(rt*x/1000)]]},
+()=>{const n=3+R(4),pr=P([199,249,299,349,399,450]),t=n*pr,pd=Math.ceil(t/500)*500+500;return[`Margaux bought ${n} shirts at ${M(pr)} each and paid ${M(pd)}. How much change does she get?`,M(pd-t),[M(pd-pr),M(t),M(pd+t),M(pd-t+100)]]}];
+// Static bank: [question, correct, wrong, wrong, wrong]
+const MC=[
+['Which of these is a capital expenditure (CAPEX)?','Buying delivery trucks for the fleet','Monthly office rent','Payroll of the sales team','Printer ink and paper'],
+['Which of these is an operating expense (OPEX)?','Monthly business internet bill','Buying a new warehouse','Buying assembly-line robots','Buying enterprise servers'],
+['Which item is part of Cost of Goods Sold (COGS)?','Raw materials','Corporate rent','Marketing ads','Administrative salaries'],
+['Which item belongs to SG&A?','Administrative salaries','Raw materials','Direct factory labor','Raw material inventory'],
+['The sum of all partner equity shares always equals','1 whole (100%)','0','The total net profit','One half (50%)'],
+['Which ethics principle requires numbers based strictly on evidence, free from bias?','Objectivity','Integrity','Confidentiality','Professional Behavior'],
+['Recording a sale only after the product is delivered is an example of','Accurate revenue recognition','Full disclosure of liabilities','Fair valuation of assets','Whistleblower protection'],
+["What is the second step of Polya's method?",'Devise a plan','Understand the problem','Carry out the plan','Look back'],
+['What is the value of 7⁰?','1','0','7','Undefined'],
+['In PEMDAS, which operation is performed first?','Parentheses','Exponents','Multiplication','Addition'],
+['Multiplying two integers with different signs gives a','Negative product','Positive product','Zero','Product with the sign of the larger number'],
+['To divide fractions, multiply the first fraction by the ___ of the second.','Reciprocal','LCD','Opposite','Numerator'],
+['Overtime is pay for hours worked beyond how many standard hours a week?','40','35','44','48'],
+['Net Pay is equal to','Gross Pay − Total Deductions','Regular Pay + Overtime Pay','Gross Pay + Total Deductions','Regular Pay − Overtime Pay'],
+['The distance of a number from zero is called its','Absolute value','Opposite','Reciprocal','Exponent'],
+['Fractions with different denominators are called','Dissimilar fractions','Similar fractions','Proper fractions','Mixed numbers']];
+// Enumeration: [question, slots ("," between required items, "|" between accepted words), model answer]
+const EN=[
+["Enumerate the 4 steps of Polya's method.",'understand,devis|plan,carry|execut,look','Understand the problem, Devise a plan, Carry out the plan, Look back'],
+['Enumerate the 5 core principles of financial statement ethics.','integrity,objectiv,competen|care,confiden,behavio','Integrity, Objectivity, Professional Competence and Due Care, Confidentiality, Professional Behavior'],
+['Name the 2 sub-categories of operating expenses.','cogs|costofgoods,sga|selling','COGS and SG&A'],
+['Name the 3 types of fractions.','proper,improper,mixed','Proper, Improper, Mixed number'],
+['What does PEMDAS stand for? Write all six words.','parenthes,exponent,multipl,divis,addit,subtract','Parentheses, Exponents, Multiplication, Division, Addition, Subtraction'],
+['Enumerate the 4 groups of CAPEX examples.','realestate|infrastructure|building,machinery|equipment,technology|digital|it,furniture|fixture','Physical infrastructure and real estate, Machinery and equipment, Technology and digital infrastructure, Furniture and fixtures'],
+['Enumerate the 4 groups of OPEX examples.','compensation|salar|benefit,facility|rent,administration|office|tech,marketing|sales','Compensation and benefits, Facility and real estate operations, Administration/tech/office overheads, Marketing and sales'],
+['Name the 2 sales commission structures.','straight,base','Straight commission; Base salary plus commission']];
+const MA=[
+{t:'Match each ethics principle with its meaning.',c:['Honest and truthful; never misrepresent or omit facts','Based strictly on evidence, free from bias','Protect sensitive data from unauthorized disclosure','Keep knowledge up to date to avoid negligent errors','Follow laws and avoid discrediting the profession'],i:[['Integrity',0],['Objectivity',1],['Confidentiality',2],['Professional Competence and Due Care',3],['Professional Behavior',4]]},
+{t:'Classify each item.',c:['CAPEX','OPEX: SG&A','OPEX: COGS'],i:[['Assembly-line robots',0],['Raw materials',2],['Corporate rent',1],['Enterprise servers',0],['Direct factory labor',2]]},
+{t:'Match each payroll term with its formula.',c:['Regular Pay + Overtime Pay','Gross Pay − Total Deductions','Overtime Hours × Overtime Rate','Eligible Sales × Commission Rate','Total Net Profit × Equity Fraction'],i:[['Gross Pay',0],['Net Pay',1],['Overtime Pay',2],['Commission Amount',3],['Partner Cash Share',4]]},
+{t:'Match each conversion with its rule.',c:['Numerator ÷ Denominator','Multiply by 100','Divide by 100','Put over 100, then simplify','Put over a power of 10, then reduce'],i:[['Fraction to decimal',0],['Decimal to percent',1],['Percent to decimal',2],['Percent to fraction',3],['Decimal to fraction',4]]},
+{t:'Match each rule with its result.',c:['Positive','Negative','1','The number itself','5'],i:[['Product of two integers with the same sign',0],['Quotient of two integers with different signs',1],['Any nonzero number raised to 0',2],['Any number raised to 1',3],['|−5|',4]]},
+{t:'Match each fraction with its percent.',c:['50%','37.5%','45%','62.5%','17.5%'],i:[['1/2',0],['3/8',1],['9/20',2],['5/8',3],['7/40',4]]}];
+
+const PR=['Yay, Wiku! You got it! 💖','Amazing, baby Wiku! So proud of you! 🌟','Correct! You are so smart, Wiku! 🥰','Wiku, you are on fire! 🔥','Perfect! Keep shining, Wiku ✨','That is my Wiku! Congratulations! 🎉'],
+EC=['It is okay, Wiku. Every mistake is a step to learning. You have got this! 💪','Do not worry, baby Wiku, you will get the next one! 🌷','So close! We believe in you, Wiku 💗','Keep going, Wiku. You are doing great and we are proud of you 🥹','Mistakes help us grow. Take a breath and keep going, Wiku! 🌈'];
+const mk=(g,en)=>{const[q,a,w]=G[g]();return en?{k:'en',q,a,disp:a}:{k:'mc',q,a,o:sh([a,...sh(U(w).filter(x=>x!==a)).slice(0,3)])}},
+ids=()=>sh([...G.keys()]);
+function build(){
+ const mc=[...ids().slice(0,12).map(g=>mk(g)),...sh(MC).slice(0,8).map(([q,a,...w])=>({k:'mc',q,a,o:sh([a,...w])}))],
+ en=[...ids().slice(0,9).map(g=>mk(g,1)),...sh(EN).slice(0,6).map(([q,s,d])=>({k:'en',q,s:s.split(','),disp:d}))],
+ ma=sh(MA).slice(0,3).flatMap((m,si)=>sh(m.i).map(([t,j])=>({k:'ma',q:t,a:m.c[j],o:sh(m.c),set:si,gt:m.t})));
+ return[...sh(mc),...sh(en),...ma]}
+let E=build(),score=0,dn=0;
+const nm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+function num(s){s=s.toLowerCase().replace(/[−–]/g,'-').replace(/php|₱|%|,/g,'').trim();let m=s.match(/^(-?\d+)\s+(\d+)\/(\d+)$/);if(m)return+m[1]+Math.sign(+m[1]||1)*m[2]/m[3];m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);if(m)return m[1]/m[2];return/^-?\d*\.?\d+$/.test(s)?+s:NaN}
+const numEq=(v,a)=>{const x=num(v),y=num(a);return Math.abs(x-y)<=1e-3*Math.max(1,Math.abs(y))};
+const TT={mc:['Part I: Multiple Choice','Tap the correct answer.'],en:['Part II: Enumeration','Type your answer, then press Check (or Enter). For lists, separate items with commas.'],ma:['Part III: Matching Type','Choose the match for each item.']};
+function render(){let h='',lk='',lg='';
+ E.forEach((x,i)=>{
+  if(x.k!=lk){lk=x.k;h+=`<h2>${TT[x.k][0]}</h2><p class="hint">${TT[x.k][1]}</p>`}
+  if(x.gt&&x.gt!=lg){lg=x.gt;h+=`<h3>${x.gt}</h3>`}
+  const b=x.k=='mc'?`<div class="o">${x.o.map((t,j)=>`<button data-i="${i}" data-j="${j}">${'ABCD'[j]}. ${t}</button>`).join('')}</div>`
+   :x.k=='en'?`<div class="r"><input id="in${i}" autocomplete="off" placeholder="Type your answer"><button data-c="${i}">Check</button></div>`
+   :`<select data-m="${i}"><option value="">Choose…</option>${x.o.map((t,j)=>`<option value="${j}">${t}</option>`).join('')}</select>`;
+  h+=`<section class="q" id="q${i}"><p><b>${i+1}.</b> ${x.q}</p>${b}<div class="fb"></div></section>`});
+ $('#app').innerHTML=h}
+function upd(){$('#st').textContent=`${dn}/${E.length} answered · ${score} correct`;$('#bar').style.width=dn/E.length*100+'%'}
+function fin(i,ok,ans){const x=E[i];if(x.d)return;x.d=1;if(ok)score++;dn++;const q=$('#q'+i);q.classList.add(ok?'ok':'no');
+ q.querySelectorAll('button,input,select').forEach(e=>e.disabled=true);
+ q.querySelector('.fb').innerHTML=ok?'✅ Correct! '+P(PR):`❌ Not quite. The correct answer: <u>${ans}</u><br>${P(EC)}`;
+ upd();pop(ok);if(dn==E.length)end()}
+let tt;function pop(ok){const t=$('#toast');t.textContent=ok?P(PR):P(EC);t.className='show '+(ok?'ok':'no');clearTimeout(tt);tt=setTimeout(()=>t.className='',2600);
+ if(ok&&!matchMedia('(prefers-reduced-motion:reduce)').matches)for(let i=0;i<14;i++){const c=document.createElement('span');c.className='cf';c.textContent=P(['💖','🌟','🎉','✨','🌷']);c.style.left=R(100)+'vw';c.style.animationDelay=Math.random()*.4+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),2400)}}
+function chk(i){const x=E[i],v=$('#in'+i).value;if(!v.trim())return;const nv=nm(v);
+ fin(i,x.s?x.s.every(s=>s.split('|').some(t=>nv.includes(t))):numEq(v,x.a),x.disp)}
+const msg=p=>p>=90?'Wiku, you are amazing! Almost perfect. So proud of you! 🏆💖':p>=75?'Great job, baby Wiku! You really know your stuff! 🌟':p>=50?'Good effort, Wiku! You are getting there. A retake will make you even stronger! 💪':'Wiku, this was just practice. Every try makes you better. Retake it, we believe in you! 🌷';
+function end(){const p=Math.round(score/E.length*100),r=$('#res');
+ $('#sum').innerHTML=`<h2>You scored ${score} / ${E.length} (${p}%)</h2><p>${msg(p)}</p>`;
+ r.scrollIntoView({behavior:'smooth'})}
+function load(){score=dn=0;E.forEach(x=>delete x.d);render();$('#sum').innerHTML='<h2>Finish all 50 items to see your score</h2><p>You can do this, Wiku! 💗</p>';upd();scrollTo(0,0)}
+function shuf(){const by=k=>E.filter(x=>x.k==k),ma=by('ma'),sets=[...new Set(ma.map(x=>x.set))];
+ E=[...sh(by('mc')),...sh(by('en')),...sh(sets).flatMap(s=>sh(ma.filter(x=>x.set==s)))];E.forEach(x=>{if(x.o)x.o=sh(x.o)})}
+$('#app').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+ if(b.dataset.j!=null){const i=+b.dataset.i,x=E[i],t=x.o[b.dataset.j];b.classList.add(t==x.a?'g':'b');
+  if(t!=x.a)[...b.parentNode.children].find(z=>z.textContent.slice(3)==x.a).classList.add('g');fin(i,t==x.a,x.a)}
+ else if(b.dataset.c!=null)chk(+b.dataset.c)};
+$('#app').onchange=e=>{const s=e.target;if(s.dataset.m==null||s.value==='')return;const i=+s.dataset.m,x=E[i],t=x.o[s.value];fin(i,t==x.a,x.a)};
+$('#app').onkeydown=e=>{if(e.key=='Enter'&&e.target.id&&e.target.id.startsWith('in'))chk(+e.target.id.slice(2))};
+$('#res').onclick=e=>{const d=e.target.id;if(d=='rt')load();else if(d=='sf'){shuf();load()}else if(d=='gn'){E=build();load()}};
+load();
+</script></body></html>
